@@ -1,0 +1,9 @@
+opencv-python
+numpy
+wheel
+setuptools
+dlib
+face_recognition
+tf-keras
+tensorflow
+deepface

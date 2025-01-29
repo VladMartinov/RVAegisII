@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package face_recognition;
+
+service FaceRecognition {
+  rpc SendImages (ImageRequest) returns (ImageResponse);
+  rpc GetResults (ResultRequest) returns (ResultResponse);
+}
+
+message ImageRequest {
+  repeated bytes images = 1;
+  repeated string labels = 2;
+}
+
+message ImageResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ResultRequest {
+}
+
+message ResultResponse {
+  repeated bytes processed_images = 1;
+  repeated string recognized_labels = 2;
+}
