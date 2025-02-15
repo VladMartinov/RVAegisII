@@ -39,22 +39,36 @@ class FaceRecognitionServicer(face_recognition_pb2_grpc.FaceRecognitionServicer)
         # Получаем текущие кадры с камер
         frames = self.face_recognition_ai.get_current_frames()
 
-        # Преобразуем кадры в формат, подходящий для gRPC
-        processed_images = [
-            cv2.imencode(".jpg", frame)[1].tobytes()
-            for all_frames in frames
-            for frame in all_frames
-            if frame is not None
-        ]
+        # Преобразуем кадры в формат для gRPC с группировкой по камерам
+        processed_camera_frames = []
+        total_frames = 0
+
+        for camera_index, all_frames in frames.items():
+            encoded_frames = []
+            for frame in all_frames:
+                if frame is not None:
+                    # Кодируем кадр в JPEG
+                    success, buffer = cv2.imencode(".jpg", frame)
+                    if success:
+                        encoded_frames.append(buffer.tobytes())
+
+            # Добавляем данные камеры в результат
+            processed_camera_frames.append(
+                face_recognition_pb2.CameraFrames(
+                    camera_index=camera_index,
+                    frames=encoded_frames
+                )
+            )
+
+            total_frames += len(encoded_frames)
 
         # Расчет FPS
         current_time = time.time()
         if not hasattr(self, "_last_fps_update"):
-            # Инициализация при первом вызове
             self._last_fps_update = current_time
             self._frame_counter = 0
 
-        self._frame_counter += len(processed_images)
+        self._frame_counter += total_frames
         time_diff = current_time - self._last_fps_update
 
         if time_diff >= 1.0:
@@ -63,8 +77,11 @@ class FaceRecognitionServicer(face_recognition_pb2_grpc.FaceRecognitionServicer)
             self._last_fps_update = current_time
             self._frame_counter = 0
 
-        print(f"[INFO] Returning {len(processed_images)} processed frames.")
-        return face_recognition_pb2.ResultResponse(processed_images=processed_images)
+        print(f"[INFO] Returning {total_frames} frames from {len(processed_camera_frames)} cameras.")
+        return face_recognition_pb2.ResultResponse(
+            camera_frames=processed_camera_frames,
+            recognized_labels=[]  # Заглушка, можно реализовать логику
+        )
 
     def stop(self):
         """Останавливает поток отображения."""

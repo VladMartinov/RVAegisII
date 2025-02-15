@@ -21,3 +21,7 @@ class FaceDatabase:
     def get_face_ids(self):
         with self.lock:
             return list(self.known_faces.keys())
+
+    def clear(self):
+        with self.lock:
+            self.known_faces.clear()

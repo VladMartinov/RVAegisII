@@ -7,7 +7,7 @@ class Config:
     # Настройки камер
     CAMERA_RESOLUTION = (640, 480)
     CAMERA_FPS = 30
-    MAX_FRAMES_IN_QUEUE = 5
+    MAX_FRAMES_IN_QUEUE = 1
     SHOW_CAMERA_WINDOW = True
     NUM_CAMERAS = 2
 

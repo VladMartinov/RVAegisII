@@ -3,17 +3,16 @@ import os
 from threading import Lock
 from concurrent.futures import ThreadPoolExecutor
 from core.frame_queue import FrameQueue
-from core.image_processor import ImageProcessor
 from config import Config
 
 class CameraManager:
-    def __init__(self, face_database):
+    def __init__(self, image_processor):
         self.cameras = []
         self.lock = Lock()
         self.is_running = False
         self.camera_threads = {}
         self.frame_queues = {}
-        self.image_processor = ImageProcessor(face_database)
+        self.image_processor = image_processor
 
         max_workers = min(Config().NUM_CAMERAS, os.cpu_count() or 1)
         self.thread_pool = ThreadPoolExecutor(max_workers = max_workers)
@@ -47,7 +46,7 @@ class CameraManager:
                 continue
 
             frame_queue = FrameQueue(max_size = Config().MAX_FRAMES_IN_QUEUE)
-            self.thread_pool.submit(self._capture_loop, camera_index, cap, frame_queue)  # Используем пул потоков
+            self.thread_pool.submit(self._capture_loop, camera_index, cap, frame_queue)
 
             self.camera_threads[camera_index] = cap
             self.frame_queues[camera_index] = frame_queue
@@ -58,6 +57,7 @@ class CameraManager:
             if not ret:
                 print(f"Не удалось получить изображение с камеры {camera_index}")
                 break
+
             processed_frame = self.image_processor.process_frame(frame)     # Обрабатываем кадр
             frame_queue.put(processed_frame)                                # Сохраняем обработанный кадр
 

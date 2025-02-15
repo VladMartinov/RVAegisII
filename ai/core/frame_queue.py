@@ -14,7 +14,7 @@ class FrameQueue:
         frames = []
         try:
             while True:
-                frame = self.queue.get(block=False)
+                frame = self.queue.get(block = False)
                 frames.append(frame)
         except queue.Empty:
             pass

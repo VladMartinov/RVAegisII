@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x16\x66\x61\x63\x65_recognition.proto\x12\x10\x66\x61\x63\x65_recognition\".\n\x0cImageRequest\x12\x0e\n\x06images\x18\x01 \x03(\x0c\x12\x0e\n\x06labels\x18\x02 \x03(\t\"1\n\rImageResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"\x0f\n\rResultRequest\"E\n\x0eResultResponse\x12\x18\n\x10processed_images\x18\x01 \x03(\x0c\x12\x19\n\x11recognized_labels\x18\x02 \x03(\t2\xb1\x01\n\x0f\x46\x61\x63\x65Recognition\x12M\n\nSendImages\x12\x1e.face_recognition.ImageRequest\x1a\x1f.face_recognition.ImageResponse\x12O\n\nGetResults\x12\x1f.face_recognition.ResultRequest\x1a .face_recognition.ResultResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x16\x66\x61\x63\x65_recognition.proto\x12\x10\x66\x61\x63\x65_recognition\".\n\x0cImageRequest\x12\x0e\n\x06images\x18\x01 \x03(\x0c\x12\x0e\n\x06labels\x18\x02 \x03(\t\"1\n\rImageResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"\x0f\n\rResultRequest\"4\n\x0c\x43\x61meraFrames\x12\x14\n\x0c\x63\x61mera_index\x18\x01 \x01(\x05\x12\x0e\n\x06\x66rames\x18\x02 \x03(\x0c\"b\n\x0eResultResponse\x12\x35\n\rcamera_frames\x18\x01 \x03(\x0b\x32\x1e.face_recognition.CameraFrames\x12\x19\n\x11recognized_labels\x18\x02 \x03(\t2\xb1\x01\n\x0f\x46\x61\x63\x65Recognition\x12M\n\nSendImages\x12\x1e.face_recognition.ImageRequest\x1a\x1f.face_recognition.ImageResponse\x12O\n\nGetResults\x12\x1f.face_recognition.ResultRequest\x1a .face_recognition.ResultResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -37,8 +37,10 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_IMAGERESPONSE']._serialized_end=141
   _globals['_RESULTREQUEST']._serialized_start=143
   _globals['_RESULTREQUEST']._serialized_end=158
-  _globals['_RESULTRESPONSE']._serialized_start=160
-  _globals['_RESULTRESPONSE']._serialized_end=229
-  _globals['_FACERECOGNITION']._serialized_start=232
-  _globals['_FACERECOGNITION']._serialized_end=409
+  _globals['_CAMERAFRAMES']._serialized_start=160
+  _globals['_CAMERAFRAMES']._serialized_end=212
+  _globals['_RESULTRESPONSE']._serialized_start=214
+  _globals['_RESULTRESPONSE']._serialized_end=312
+  _globals['_FACERECOGNITION']._serialized_start=315
+  _globals['_FACERECOGNITION']._serialized_end=492
 # @@protoc_insertion_point(module_scope)

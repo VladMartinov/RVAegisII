@@ -6,6 +6,7 @@ from config import Config
 from core.face_database import FaceDatabase
 from core.face_detector import FaceDetector
 from core.face_recognizer import FaceRecognizer
+from core.image_processor import ImageProcessor
 from core.camera import CameraManager
 
 class FaceRecognitionAI:
@@ -14,7 +15,8 @@ class FaceRecognitionAI:
         self.face_database = FaceDatabase()
         self.face_detector = FaceDetector()
         self.face_recognizer = FaceRecognizer()
-        self.camera_manager = CameraManager(self.face_database)
+        self.image_processor = ImageProcessor(self.face_database)
+        self.camera_manager = CameraManager(self.image_processor)
 
         # Переменная для хранения текущего кадра
         self.frames = {}
@@ -44,6 +46,13 @@ class FaceRecognitionAI:
         :param images: Список изображений в формате bytes.
         :param labels: Список лейблов для изображений.
         """
+
+        # Приостанавливаем распознавание лиц
+        self.image_processor.pause_recognition()
+
+        # Очищаем базу данных перед добавлением новых данных
+        self.face_database.clear()
+
         for image_bytes, label in zip(images, labels):
             # Преобразуем bytes в изображение
             nparr = np.frombuffer(image_bytes, np.uint8)
@@ -56,6 +65,9 @@ class FaceRecognitionAI:
                 print(f"[INFO] Added face with label: {label}")
             else:
                 print(f"[WARNING] No faces found in image for label: {label}")
+
+        # Возобновляем распознавание лиц
+        self.image_processor.resume_recognition()
 
     def start_camera_processing(self):
         """
@@ -77,10 +89,10 @@ class FaceRecognitionAI:
     def get_current_frames(self):
         """
         Возвращает текущие кадры с камер.
-        :return: Список кадров (numpy arrays).
+        :return: Словарь, где ключи - индексы камер, значения - списки кадров (numpy arrays).
         """
         with self.lock:
-            return list(self.frames.values())
+            return self.frames.copy()
 
     def stop(self):
         """Останавливает поток отображения."""

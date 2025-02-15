@@ -1,3 +1,4 @@
+import threading
 import numpy as np
 from config import Config
 from deepface import DeepFace
@@ -18,12 +19,16 @@ class FaceRecognitionComparer(FaceComparer):
         self.tolerance = cfg["tolerance"]
 
     def get_face_encodings(self, image):
-        rgb_image = np.array(image[:, :, ::-1])  # BGR to RGB
-        return face_recognition.face_encodings(
-            rgb_image,
-            num_jitters = self.num_jitters,
-            model = self.model
-        )
+        try:
+            rgb_image = np.array(image[:, :, ::-1])  # BGR to RGB
+            return face_recognition.face_encodings(
+                rgb_image,
+                num_jitters = self.num_jitters,
+                model = self.model
+            )
+        except Exception as e:
+            print(f"FaceRecognition error: {str(e)}")
+            return []
 
     def compare_faces(self, face_encodings, known_face_encodings):
         if not face_encodings or not known_face_encodings:
@@ -89,6 +94,7 @@ class DeepFaceComparer(FaceComparer):
 class FaceRecognizer:
     def __init__(self):
         method = Config().FACE_COMPARISON["method"]
+        self.lock = threading.Lock()  # Добавляем блокировку
 
         if method == "face_recognition":
             self.comparer = FaceRecognitionComparer()
@@ -98,7 +104,9 @@ class FaceRecognizer:
             raise ValueError(f"Unknown comparison method: {method}")
 
     def get_face_encodings(self, image):
-        return self.comparer.get_face_encodings(image)
+        with self.lock:
+            return self.comparer.get_face_encodings(image)
 
     def compare_faces(self, face_encodings, known_face_encodings):
-        return self.comparer.compare_faces(face_encodings, known_face_encodings)
+        with self.lock:
+            return self.comparer.compare_faces(face_encodings, known_face_encodings)
