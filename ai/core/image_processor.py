@@ -1,5 +1,7 @@
 import cv2
+import numpy as np
 import threading
+from PIL import Image, ImageDraw, ImageFont
 from config import Config
 from core.face_detector import FaceDetector
 from core.face_recognizer import FaceRecognizer
@@ -46,6 +48,7 @@ class ImageProcessor:
 
             if 'face_detect' in Config().IMAGE_PROCESSORS:
                 faces = self.face_detector.detect_faces(processed_frame)
+                texts_to_draw = []
 
                 for (left, top, right, bottom) in faces:
                     x, y, w, h = left, top, right-left, bottom-top
@@ -72,9 +75,30 @@ class ImageProcessor:
 
                             if matched_id:
                                 display_unknown_label = False
-                                cv2.putText(frame, matched_id, (x, y - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (255, 255, 255), 2)
+                                texts_to_draw.append((matched_id, (x, y - 20)))
 
                     if display_unknown_label:
                         cv2.putText(frame, 'Uncknown', (x, y - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (255, 255, 255), 2)
+
+                if texts_to_draw:
+                    # Конвертация кадра в PIL Image
+                    pil_image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+                    draw = ImageDraw.Draw(pil_image)
+
+                    try:
+                        # Укажите путь к .ttf файлу с поддержкой кириллицы
+                        font = ImageFont.truetype("./fonts/arial.ttf", size=20)
+                    except IOError:
+                        font = ImageFont.load_default()
+
+                    for text, (x, y_pos) in texts_to_draw:
+                        # Корректировка позиции для выравнивания текста
+                        text_bbox = font.getbbox(text)
+                        text_height = text_bbox[3] - text_bbox[1]
+                        adjusted_y = y_pos - text_height
+                        draw.text((x, adjusted_y), text, font=font, fill=(255, 255, 255))
+
+                    # Обратная конвертация в BGR
+                    frame = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
 
             return frame
