@@ -7,8 +7,8 @@ class Config:
     # Настройки камер
     CAMERA_RESOLUTION = (640, 480)
     CAMERA_FPS = 30
-    MAX_FRAMES_IN_QUEUE = 1
-    SHOW_CAMERA_WINDOW = True
+    MAX_FRAMES_IN_QUEUE = 2
+    SHOW_CAMERA_WINDOW = False
     NUM_CAMERAS = 2
 
     # Настройки обработки
@@ -47,6 +47,9 @@ class Config:
             "detector_backend": "opencv"
         }
     }
+
+    # Настройки связи с gRPC
+    FPS_RETURNING = 10
 
 # Экземпляр конфигурации
 config = Config()

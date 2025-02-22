@@ -79,7 +79,7 @@ class FaceRecognitionAI:
             frames = self.camera_manager.get_frames()
             with self.lock:
                 self.frames = frames
-            time.sleep(0.040)
+            time.sleep(Config().FPS_RETURNING / 100)
 
         # Останавливаем захват кадров
         self.camera_manager.stop_capture()
