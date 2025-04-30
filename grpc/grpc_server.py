@@ -44,23 +44,36 @@ class FaceRecognitionServicer(face_recognition_pb2_grpc.FaceRecognitionServicer)
         total_frames = 0
 
         for camera_index, all_frames in frames.items():
-            encoded_frames = []
+            processed_frames = []
+
             for frame in all_frames:
-                if frame is not None:
+                processed_frame, cropped_faces, recognized_labels = frame
+
+                if processed_frame is not None:
                     # Кодируем кадр в JPEG
-                    success, buffer = cv2.imencode(".jpg", frame)
+                    success, buffer = cv2.imencode(".jpg", processed_frame)
                     if success:
-                        encoded_frames.append(buffer.tobytes())
+                        # Собираем обрезанные лица и лейблы
+                        try:
+                            processed_frames.append(
+                                face_recognition_pb2.ProcessedFrame(
+                                    frame=buffer.tobytes(),
+                                    cropped_faces=cropped_faces,
+                                    recognized_labels=recognized_labels,
+                                )
+                            )
+                        except Exception as inst:
+                            print("[ERROR] Exception: ", inst)
 
             # Добавляем данные камеры в результат
             processed_camera_frames.append(
-                face_recognition_pb2.CameraFrames(
+                face_recognition_pb2.CamerasObject(
                     camera_index=camera_index,
-                    frames=encoded_frames
+                    frames=processed_frames,
                 )
             )
 
-            total_frames += len(encoded_frames)
+            total_frames += len(processed_frames)
 
         # Расчет FPS
         current_time = time.time()
@@ -79,8 +92,7 @@ class FaceRecognitionServicer(face_recognition_pb2_grpc.FaceRecognitionServicer)
 
         print(f"[INFO] Returning {total_frames} frames from {len(processed_camera_frames)} cameras.")
         return face_recognition_pb2.ResultResponse(
-            camera_frames=processed_camera_frames,
-            recognized_labels=[]  # Заглушка, можно реализовать логику
+            response=processed_camera_frames,
         )
 
     def stop(self):

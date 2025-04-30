@@ -41,6 +41,9 @@ class ImageProcessor:
                 return frame
 
             processed_frame = frame
+            cropped_faces = []
+            detected_labels = []
+
             if 'grayscale' in Config().IMAGE_PROCESSORS:
                 processed_frame = self.convert_to_grayscale(processed_frame)
             if 'blur' in Config().IMAGE_PROCESSORS:
@@ -55,6 +58,10 @@ class ImageProcessor:
 
                     cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
                     face_image = frame[y:y+h, x:x+w]
+
+                    # Конвертируем face_image в bytes (JPEG)
+                    _, face_buffer = cv2.imencode(".jpg", face_image)
+                    cropped_faces.append(face_buffer.tobytes())
 
                     display_unknown_label = True
                     face_encodings = self.face_recognizer.get_face_encodings(face_image)
@@ -78,7 +85,8 @@ class ImageProcessor:
                                 texts_to_draw.append((matched_id, (x, y - 20)))
 
                     if display_unknown_label:
-                        cv2.putText(frame, 'Uncknown', (x, y - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (255, 255, 255), 2)
+                        detected_labels.append('Unknown')
+                        cv2.putText(frame, 'Unknown', (x, y - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (255, 255, 255), 2)
 
                 if texts_to_draw:
                     # Конвертация кадра в PIL Image
@@ -96,9 +104,11 @@ class ImageProcessor:
                         text_bbox = font.getbbox(text)
                         text_height = text_bbox[3] - text_bbox[1]
                         adjusted_y = y_pos - text_height
+
+                        detected_labels.append(text)
                         draw.text((x, adjusted_y), text, font=font, fill=(255, 255, 255))
 
                     # Обратная конвертация в BGR
                     frame = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
 
-            return frame
+            return frame, cropped_faces, detected_labels

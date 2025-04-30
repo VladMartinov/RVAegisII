@@ -20,12 +20,17 @@ message ImageResponse {
 message ResultRequest {
 }
 
-message CameraFrames {
+message ProcessedFrame {
+  bytes frame = 1;
+  repeated bytes cropped_faces = 2;
+  repeated string recognized_labels = 3;
+}
+
+message CamerasObject {
   int32 camera_index = 1;
-  repeated bytes frames = 2;
+  repeated ProcessedFrame frames = 2;
 }
 
 message ResultResponse {
-  repeated CameraFrames camera_frames = 1;
-  repeated string recognized_labels = 2;
+  repeated CamerasObject response = 1;
 }
